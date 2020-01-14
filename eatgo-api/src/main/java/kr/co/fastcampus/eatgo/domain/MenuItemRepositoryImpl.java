@@ -10,9 +10,11 @@ public class MenuItemRepositoryImpl implements MenuItemRepository{
 
     private List<MenuItem> menuItems = new ArrayList<>();
 
-    MenuItemRepositoryImpl() {
+    public MenuItemRepositoryImpl() {
+
         menuItems.add(new MenuItem("Kimchi"));
     }
+
     @Override
     public List<MenuItem> findAllByRestaurantId(Long restaurantId) {
         return menuItems;
