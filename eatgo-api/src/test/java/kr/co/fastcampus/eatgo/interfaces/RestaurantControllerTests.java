@@ -6,14 +6,22 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.hamcrest.core.StringContains.containsString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(RestaurantController.class)
@@ -22,18 +30,28 @@ public class RestaurantControllerTests {
     @Autowired
     private MockMvc mvc;
 
-    //repository 의존성 주입
-    @SpyBean(RestaurantService.class)
+
+    //Mock 사용하여 가짜객채 만들어주기
+    @MockBean
     private RestaurantService restaurantService;
 
-    @SpyBean(RestaurantRepositoryImpl.class)
-    private RestaurantRepository restaurantRepository;
-
-    @SpyBean(MenuItemRepositoryImpl.class)
-    private MenuItemRepository menuItemRepository;
+    //repository 의존성 주입
+//    @SpyBean(RestaurantService.class)
+//    private RestaurantService restaurantService;
+//
+//    @SpyBean(RestaurantRepositoryImpl.class)
+//    private RestaurantRepository restaurantRepository;
+//
+//    @SpyBean(MenuItemRepositoryImpl.class)
+//    private MenuItemRepository menuItemRepository;
 
     @Test
     public void list() throws Exception {
+        List<Restaurant> restaurants = new ArrayList<>();
+        restaurants.add(new Restaurant(1004L,"Bob zip", "Seoul"));
+
+        given(restaurantService.getRestaurants()).willReturn(restaurants);
+
         mvc.perform( get("/restaurants"))
                 .andExpect(status().isOk())
                 .andExpect(content().string(
@@ -46,6 +64,14 @@ public class RestaurantControllerTests {
 
     @Test
     public void detail() throws Exception {
+        Restaurant restaurant1 = new Restaurant(1004L, "Bob zip", "Seoul");
+        restaurant1.addMenuItem(new MenuItem("Kimchi"));
+
+        Restaurant restaurant2 = new Restaurant(2020L, "Cyber food", "Seoul");
+
+        given(restaurantService.getRestaurant(1004L)).willReturn(restaurant1);
+        given(restaurantService.getRestaurant(2020L)).willReturn(restaurant2);
+
         mvc.perform( get("/restaurants/1004"))
                 .andExpect(status().isOk())
                 .andExpect(content().string(
@@ -65,6 +91,22 @@ public class RestaurantControllerTests {
                 .andExpect(content().string(
                         containsString("\"id\":2020")
                 ));
+    }
+
+
+    @Test
+    public void create() throws Exception {
+
+        //Restaurant restaurant = new Restaurant(1234L, "BeRyong", "Busan");
+
+        mvc.perform(post("/restaurants")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"name\":\"BeRyong\", \"address\":\"Busan\"}"))
+                .andExpect(status().isCreated())
+                .andExpect(header().string("location","/restaurants/1234"))
+                .andExpect(content().string("{}")); //Empty 구현
+
+        verify(restaurantService).addRestaurant(any());
     }
 
 }
