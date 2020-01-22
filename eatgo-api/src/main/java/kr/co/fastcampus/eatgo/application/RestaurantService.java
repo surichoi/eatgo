@@ -24,7 +24,7 @@ public class RestaurantService {
 
     public Restaurant getRestaurant(Long id){
 
-        Restaurant restaurant = restaurantRepository.findById(id);
+        Restaurant restaurant = restaurantRepository.findById(id).orElse(null);//optional처리
         List<MenuItem> menuItems = menuItemRepository.findAllByRestaurantId(id);
         restaurant.setMenuItems(menuItems);
 
@@ -37,7 +37,24 @@ public class RestaurantService {
         return restaurants;
     }
 
-    public void addRestaurant(Restaurant restaurant) {
+    public Restaurant addRestaurant(Restaurant restaurant) {
 
+        return restaurantRepository.save(restaurant);
+
+    }
+
+    public Restaurant updateRestaurant(Long id, String name, String address) {
+
+        Restaurant restaurant = restaurantRepository.findById(id).orElse(null);
+//        restaurant.setName(name);
+//        restaurant.setAddress(address);
+
+        restaurant.updateInformation(name, address);
+
+
+        //Restaurant restaurant = new Restaurant(id, name, address);
+
+        return restaurant;
+        //return restaurantRepository.save(restaurant);
     }
 }

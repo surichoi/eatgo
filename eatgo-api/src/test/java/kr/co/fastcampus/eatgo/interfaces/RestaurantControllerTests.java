@@ -19,8 +19,7 @@ import static org.hamcrest.core.StringContains.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @RunWith(SpringRunner.class)
@@ -98,6 +97,12 @@ public class RestaurantControllerTests {
     public void create() throws Exception {
 
         //Restaurant restaurant = new Restaurant(1234L, "BeRyong", "Busan");
+        given(restaurantService.addRestaurant(any())).will(invocation -> {
+            Restaurant restaurant = invocation.getArgument(0);
+
+            return new Restaurant(1234L,restaurant.getName(),
+                    restaurant.getAddress());
+        });//갑자기 어디서 왜 튀어나온건지 모르겟음
 
         mvc.perform(post("/restaurants")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -107,6 +112,18 @@ public class RestaurantControllerTests {
                 .andExpect(content().string("{}")); //Empty 구현
 
         verify(restaurantService).addRestaurant(any());
+    }
+
+
+    @Test
+    public void update() throws Exception {
+        mvc.perform(patch("/restaurants/1004")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"name\":\"JOKER Bar\", \"address\":\"Busan\"}"))
+                .andExpect(status().isOk());
+
+        //verify(restaurantService).updateRestaurant(any());
+        //
     }
 
 }

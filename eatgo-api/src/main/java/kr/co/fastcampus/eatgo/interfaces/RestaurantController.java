@@ -48,10 +48,20 @@ public class RestaurantController {
         String name = resource.getName();
         String address = resource.getAddress() ;
 
-        Restaurant restaurant = new Restaurant(1234L, name, address);
+        Restaurant restaurant = new Restaurant(name, address);
         restaurantService.addRestaurant(restaurant);
 
         URI location = new URI("/restaurants/" + restaurant.getId());
         return ResponseEntity.created(location).body("{}");
+    }
+
+    @PatchMapping("/restaurants/{id}")
+    public String update(@PathVariable("id") Long id, @RequestBody Restaurant resource) {
+        String name = resource.getName();
+        String address = resource.getAddress();
+
+        restaurantService.addRestaurant(resource);
+
+        return "{}";
     }
 }

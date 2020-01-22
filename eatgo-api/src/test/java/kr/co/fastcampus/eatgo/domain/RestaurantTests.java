@@ -13,7 +13,7 @@ public class RestaurantTests {
         Restaurant restaurant = new Restaurant(1004L, "Bob zip", "Seoul");
         assertThat(restaurant.getName(), is("Bob zip"));
         assertThat(restaurant.getAddress(), is("Seoul"));
-        assertThat(restaurant.getId(), is(1004));
+        assertThat(restaurant.getId(), is(1004L));
     }
 
     //Info
