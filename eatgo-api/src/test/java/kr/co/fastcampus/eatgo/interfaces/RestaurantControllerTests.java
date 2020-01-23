@@ -13,6 +13,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.hamcrest.core.StringContains.containsString;
@@ -47,7 +48,13 @@ public class RestaurantControllerTests {
     @Test
     public void list() throws Exception {
         List<Restaurant> restaurants = new ArrayList<>();
-        restaurants.add(new Restaurant(1004L,"Bob zip", "Seoul"));
+        restaurants.add(Restaurant.builder()
+                .name("Bob zip")
+                .address("Seoul")
+                .id(1004L)
+                .build()
+        );
+
 
         given(restaurantService.getRestaurants()).willReturn(restaurants);
 
@@ -63,10 +70,22 @@ public class RestaurantControllerTests {
 
     @Test
     public void detail() throws Exception {
-        Restaurant restaurant1 = new Restaurant(1004L, "Bob zip", "Seoul");
-        restaurant1.addMenuItem(new MenuItem("Kimchi"));
+        Restaurant restaurant1 = Restaurant.builder()
+                .name("Bob zip")
+                .address("Seoul")
+                .id(1004L)
+                .build();
 
-        Restaurant restaurant2 = new Restaurant(2020L, "Cyber food", "Seoul");
+        MenuItem menuItem = MenuItem.builder()
+                                .name("Kimchi")
+                                .build();
+        restaurant1.setMenuItems(Arrays.asList(menuItem));
+
+        Restaurant restaurant2 = Restaurant.builder()
+                .name("Cyber food")
+                .address("Seoul")
+                .id(2020L)
+                .build();
 
         given(restaurantService.getRestaurant(1004L)).willReturn(restaurant1);
         given(restaurantService.getRestaurant(2020L)).willReturn(restaurant2);
@@ -100,9 +119,13 @@ public class RestaurantControllerTests {
         given(restaurantService.addRestaurant(any())).will(invocation -> {
             Restaurant restaurant = invocation.getArgument(0);
 
-            return new Restaurant(1234L,restaurant.getName(),
-                    restaurant.getAddress());
-        });//갑자기 어디서 왜 튀어나온건지 모르겟음
+            return Restaurant.builder()
+                    .name(restaurant.getName())
+                    .address(restaurant.getAddress())
+                    .id(1234L)
+                    .build();
+        });
+        //갑자기 어디서 왜 튀어나온건지 모르겟음
 
         mvc.perform(post("/restaurants")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -122,8 +145,8 @@ public class RestaurantControllerTests {
                 .content("{\"name\":\"JOKER Bar\", \"address\":\"Busan\"}"))
                 .andExpect(status().isOk());
 
-        //verify(restaurantService).updateRestaurant(any());
-        //
+        verify(restaurantService).updateRestaurant(1004L, "JOKER Bar", "Busan");
+
     }
 
 }
